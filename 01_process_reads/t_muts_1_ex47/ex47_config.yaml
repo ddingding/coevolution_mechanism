@@ -1,0 +1,81 @@
+BMC_TO_PRIMER:
+    D19-2172-1 : 178 (ATAGAGAG)
+    D19-2173-1 : 179 (AGAGGATA)
+    D19-2174-1 : 180 (CTCCTTAC)
+    D19-2175-1 : 181 (TATGCAGT)
+    D19-2176-1 : 182 (TACTCCTT)
+    D19-2177-1 : 183 (AGGCTTAG)
+    D19-2178-1 : 184 (ATTAGACG)
+    D19-2179-1 : 185 (CGGAGAGA)
+    D19-2180-1 : 186 (CTAGTCGA)
+    D19-2181-1 : 187 (AGCTAGAA)
+    D19-2182-1 : 188 (ACTCTAGG)
+    D19-2183-1 : 189 (TCTTACGC)
+    D19-2184-1 : 190 (CTTAATAG)
+    D19-2185-1 : 191 (ATAGCCTT)
+    D19-2186-1 : 192 (TAAGGCTC)
+    D19-2187-1 : 193 (TCGCATAA)
+    D19-2172-2 : 178 (ATAGAGAG)
+    D19-2173-2 : 179 (AGAGGATA)
+    D19-2174-2 : 180 (CTCCTTAC)
+    D19-2175-2 : 181 (TATGCAGT)
+    D19-2176-2 : 182 (TACTCCTT)
+    D19-2177-2 : 183 (AGGCTTAG)
+    D19-2178-2 : 184 (ATTAGACG)
+    D19-2179-2 : 185 (CGGAGAGA)
+    D19-2180-2 : 186 (CTAGTCGA)
+    D19-2181-2 : 187 (AGCTAGAA)
+    D19-2182-2 : 188 (ACTCTAGG)
+    D19-2183-2 : 189 (TCTTACGC)
+    D19-2184-2 : 190 (CTTAATAG)
+    D19-2185-2 : 191 (ATAGCCTT)
+    D19-2186-2 : 192 (TAAGGCTC)
+    D19-2187-2 : 193 (TCGCATAA)
+
+
+#to split T sample by.
+#these indices are in the 5'->3' direction directly after the AAGCTT RE site
+CELL_MIX_TO_AT_INDICES:
+    1 :
+        - CCAT
+        - GAGT
+        - CGTA
+        - AGGG
+        - ATTT
+        - AAAA
+        - ACCC
+        - TCGA
+        - GGAC
+        - GCTG
+        - TGCT
+        - CACG
+        - TATC
+        - TTAG
+        - CTGC
+    2 :
+        - CCAT
+        - GAGT
+        - CGTA
+        - AGGG
+        - ATTT
+        - AAAA
+        - ACCC
+        - TCGA
+        - GGAC
+
+AT_INDEX_TO_MUTKEY:
+    CCAT : W59T
+    GAGT : G62L
+    CGTA : A16K
+    AGGG : K63D
+    ATTT : E79H
+    AAAA : F73K
+    ACCC : A80R
+    TCGA : mcsAT
+    GGAC : wtAT
+    GCTG : W59A
+    TGCT : W59L
+    CACG : W59V
+    TATC : G62A
+    TTAG : G62D
+    CTGC : G62Y
