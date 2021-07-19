@@ -1,3 +1,7 @@
+'''
+calls combinatorial antitoxin mutants for a fasta file that contains read information
+'''
+
 from mutTools import fasta_iter_py3, translate, hamming, sep_mutstr_into_codon_mutstr, mutstr_to_dic, mutdic_to_mutcodon
 from constants import WT_PARD_DNA, WT_PARD_DNA_AA
 import sys
@@ -13,12 +17,13 @@ def process_combi_fasta_f(fa_f, file_out):
             n = rec.header
             read = rec.sequence
 
+            # check that read is longer than a full length antitoxin
             if len(read) < 282:
                 write_list = [n, 'len_read_less_282bp']
                 fout.write('\t'.join(write_list) + '\n')
                 continue
 
-            # get the right sequence from the sequence
+            # get the starting position of the antitoxin ORF from the sequence
             orf_start_pos = read.find('ATGGCAAACGTG')
             # if not found
             if orf_start_pos == -1:
@@ -36,9 +41,10 @@ def process_combi_fasta_f(fa_f, file_out):
                 continue
 
             if len(orf_seq) > 282:
-                write_list = [n, 'len_orf_less_282bp']
+                write_list = [n, 'len_orf_more_282bp']
                 fout.write('\t'.join(write_list) + '\n')
                 continue
+
             # check that orf ends in stop codon
             if orf_seq[-3:] != 'TAG':
                 write_list = [n, 'orf_end_not_stop']
@@ -47,7 +53,7 @@ def process_combi_fasta_f(fa_f, file_out):
 
             # now should only be full- length genes, starting with ATG, and ending in TAG
 
-            # check for hamming way too much:
+            # check for sequences that have way to many mutations (more than 9 nucleotide changes)
             if hamming(orf_seq, WT_PARD_DNA) > 9:
                 write_list = [n, 'more_than_9_bp_muts']
                 fout.write('\t'.join(write_list) + '\n')
@@ -113,9 +119,5 @@ def process_combi_fasta_f(fa_f, file_out):
 
 # for testing locally on laptop
 #process_combo_fasta_f('./test.fa', open('./test_fa_out.text', 'w'))
-
-
-fa_in = sys.argv[3]
-file_out = sys.argv[4]
 
 process_combi_fasta_f(fa_in, file_out)

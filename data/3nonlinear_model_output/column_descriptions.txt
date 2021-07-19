@@ -1,0 +1,13 @@
+muts                    amino acid mutation description T*:AT*
+yhat                    expected growth rate of the mutant by the nonlinear, independent model
+t_mut                   toxin amino acid variant
+at_mut                  antitoxin amino acid variant
+yobs                    observed mutant growth rate
+resid                   residual of the observed from the expected growth rate
+oh_all                  one-hot encoding of this particular mutant
+linear_latent           the linear latent expectation of this mutant (before being passed through the nonlinearity) in the nonlinear, independent model
+ols                     linear, independent (ordinary least squares) regression expectation of the double mutant growth rate
+yobs_from_wt            the observed double mutant growth rate different from the wild-type toxin antitoxin pair
+linear_latent_from_wt   difference in the linear latent expectation of this mutant to the wild-type toxin antitoxin pair
+yhat_from_wt            difference in the expected growth rate of this mutant from the wild-type toxin antitoxin pair
+yobs_errors             the 95% posterior highest density interval of the observed growth rate as inferred by the bayesian inference

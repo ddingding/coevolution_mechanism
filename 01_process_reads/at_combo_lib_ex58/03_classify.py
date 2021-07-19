@@ -1,24 +1,19 @@
-# take merged, and filtered fasta files
-# call mutants across entire length of gene
-# write out per read
+# take merged and filtered fasta files and call combinatorial mutants
 
 from os import listdir
 from os.path import isfile, join
-
-fasta_dir = '/n/groups/marks/users/david/ex58/02_filtered/'
-output_dir = '/n/groups/marks/users/david/ex58/03_called/'
-
+from constants import AT_COMBO_FILTERED_DIR, AT_COMBO_CALLED_DIR
+fasta_dir = AT_COMBO_FILTERED_DIR
+output_dir = AT_COMBO_CALLED_DIR
 
 fastas = [f for f in listdir(fasta_dir) if isfile(join(fasta_dir, f)) and
                       	f.endswith('fasta')]
 
 for f in fastas:
-
 	fin = fasta_dir + f
 	fout = output_dir + f[:-6] + '.csv'
 
-
-    my_cmd = 'sbatch submitCombi.sh {} {} '.format(fin, fout)
+    my_cmd = 'process_one_combi.py {} {} '.format(fin, fout)
 	print(my_cmd)
 	os.system(my_cmd)
 

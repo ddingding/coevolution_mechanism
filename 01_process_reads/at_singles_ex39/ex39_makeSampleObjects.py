@@ -1,61 +1,72 @@
-from configx39 import expToInd, exp_to_od, expToTemplate
+# takes a file of classified reads, and create sample and timecourse objects based on metadata in config file
 
-from os import listdir
-from os.path import isfile, join
+from os.path import isfile
 import pickle
+
+from configx39 import expToInd, exp_to_od, expToTemplate
 import libClass as lc
 from mutTools import rev_complement
-import plottingTools as pt
 
 
 ####################################make pickles of the samples
 ##############################################################################################
-def makeSamplePickles(classPath1, classPath2, pickleDir, pickleN=''):
-    for k,ind in expToInd.iteritems():
-        ind=rev_complement(ind)
-        if not isfile(pickleDir+ind+pickleN+'.p'):
-            #self, filename,sampleName=None, timepoint=None, od=None,template=None, use_nns = False, at = None, t = None)
 
+def makeSamplePickles(classPaths, pickleDir, pickleN=''):
+    # go through antitoxin conditions and respective illumina multiplex indices
+    # creates sample object pickles named after the illumina multiplex index used
+    for k, ind in expToInd.iteritems():
+        ind = rev_complement(ind)
+        pickle_fname =pickleDir + ind + pickleN + '.p'
+        if not isfile(pickle_fname):
+            # fetch the metadata
             sampletype, timepoint = k.split('_')
             od = exp_to_od[k]
             template = expToTemplate[k]
-            #BUG used classPath1 twice!! now changed to classPath2 in the second instance
-            currObj = lc.SampleObject([classPath1+ind+'_class.csv',classPath2+ind+'_class.csv'], sampleName=ind, timepoint=int(timepoint), template =template, od=od, use_nns=False)
-            pickle.dump(currObj, open(pickleDir+ind+pickleN+'.p', 'wb'))
+
+            # create sample object
+            currObj = lc.SampleObject([fin + ind + '_class.csv' for fin in classPaths], sampleName=ind,
+                                      timepoint=int(timepoint), template=template, od=od, use_nns=False)
+            pickle.dump(currObj, open(pickle_fname, 'wb'))
         else:
             continue
 
-#combine sample objects from both miseqs
+#make sample object from files for miseq run 1
+classPath1 = '/Users/davidd/DropboxLinks/DropboxHMS/parESingleLibrary/ex39_libraryRun/illumina/04_class_mi1/'
+pickleDir1 = './pickles/miseq1/'
+makeSamplePickles(classPath1, pickleDir1)
+
+#make sample object from files for miseq run 2
+classPath2 = '/Users/davidd/DropboxLinks/DropboxHMS/parESingleLibrary/ex39_libraryRun/illumina/04_class_mi2/'
+pickleDir2 = './pickles/miseq2/'
+makeSamplePickles(classPath2, pickleDir2)
+
+# combine sample objects from both miseqs
 pickleDir = '/Users/davidd/DropboxLinks/DropboxHMS/parESingleLibrary/ex39_libraryRun/illumina/pickles/'
-makeSamplePickles(classPath1, classPath2, pickleDir, pickleN = '_miMerged_nov2019')
-
-
+makeSamplePickles(classPath1, classPath2, pickleDir, pickleN='_miMerged_nov2019')
 
 #######################################################################################################
 
 
 pickleDir = '/Users/davidd/DropboxLinks/DropboxHMS/parESingleLibrary/ex39_libraryRun/illumina/pickles/'
-# load all the s_objects
-indToSampleObj= {}
 
 print 'making tc'
-
 def makeTcObj(expList, piName, template):
+    #make timecourse object pickles
 
-    for ind in [expToInd[exp] for exp in expList]: #[expToInd['1.1_0'],expToInd['1.1_330'],expToInd['1.1_600']]:
-        #load samples
+    # load all the s_objects
+    indToSampleObj = {}
+    for ind in [expToInd[exp] for exp in expList]:
+        # load samples
         print 'loading sample', ind
         ind_rev = rev_complement(ind)
-        currObj = pickle.load(open(pickleDir+ind_rev+'_miMerged_nov2019.p', 'rb'))
+        currObj = pickle.load(open(pickleDir + ind_rev + '_miMerged_nov2019.p', 'rb'))
         indToSampleObj[ind] = currObj
 
-    #make sampleList
+    # fetch sample objects belonging to one timecourse experiment, and create a timecourse object
     sObjList = [indToSampleObj[expToInd[exp]] for exp in expList]
     tc = lc.Timecourse(template, sObjList)
-    tc.calculateFitness(first_timepoint=0)
-    tc.samples[-1].calc_average_aa_fit()
-    pickle.dump(tc, open(pickleDir+piName, 'wb'))
+    pickle.dump(tc, open(pickleDir + piName, 'wb'))
 
 
-makeTcObj(['4.1_0','4.1_600'], '41_tc_nov2019.p', 'pard')
-makeTcObj(['4.2_0','4.2_600'], '42_tc_nov2019.p', 'pard')
+makeTcObj(['4.1_0', '4.1_600'], '41_tc_nov2019.p', 'pard')
+makeTcObj(['4.2_0', '4.2_600'], '42_tc_nov2019.p', 'pard')

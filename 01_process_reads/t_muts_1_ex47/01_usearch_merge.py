@@ -1,28 +1,12 @@
-## 1() filter by phred score.
-# using edgar's fastq filter usearch
-# switched to vsearch to handle larger files ~ >5gb
+# call vsearch to merge paired end reads.
 
-import os
 from os import listdir
 from os.path import isfile, join
 from pipelineTools import merge_paired_reads_vsearch_o2
-
-################################################################################
-
-################################################################################
-
-if __name__ == '__main__':
-	#merge dirs
-
-	#for the first machine:
-	fastqPath = '/n/groups/marks/users/david/ex47/01fastq/'
-	outputDir = '/n/groups/marks/users/david/ex47/02merged/'
-
-	# for the second machine
-	#fastqPath = '/n/groups/marks/users/david/ex47/01fastq_2_3786W/'
-	#outputDir = '/n/groups/marks/users/david/ex47/02merged_2_3786W/'
+from constants import T_SINGLE_1_CONCAT_DIR_M1, T_SINGLE_1_CONCAT_DIR_M2, T_SINGLE_1_MERGED_DIR_M1, T_SINGLE_1_MERGED_DIR_M2
 
 
+def merge_reads(fastqPath, outputDir):
 	with open(outputDir+'cmdsUsed.txt', 'w') as fout:
 		# get a list of files that are already merged.
 		done_nums = [f.rstrip('-_merged.fastq')[-3:] for f in listdir(outputDir)
@@ -39,3 +23,14 @@ if __name__ == '__main__':
 								fastqPath+fa+'2_sequence.fastq',outputDir+fa[:-1])
 
 			fout.write(vsearch_cmd + '\n')
+
+#for the first machine:
+fastqPath = T_SINGLE_1_CONCAT_DIR_M1
+outputDir = T_SINGLE_1_MERGED_DIR_M1
+merge_reads(fastqPath, outputDir)
+
+# for the second machine
+fastqPath = T_SINGLE_1_CONCAT_DIR_M2
+outputDir = T_SINGLE_1_MERGED_DIR_M2
+merge_reads(fastqPath, outputDir)
+

@@ -1,0 +1,22 @@
+aa_mut              depending on file: antitoxin or toxin amino acid variant
+col                 Stan model variable name
+mean_fit            mean posterior growth rate relative to the antitoxin single mutant in this sample. This is the mean across all MCMC samples (in our case 10,000 samples).
+2.5%                different percentile posterior growth rates, ie.  the delta growth rate (gr(AT*/T*) - gr(AT*/Twt)) value at which 2.5% of the posterior samples fall below
+5%
+10%
+16%
+25%
+30%
+50%
+70%
+75%
+84%
+90%
+95%
+97.5%
+p                   fraction of 10,000 MCMC samples for this amino acid mutant falling above the antitoxin single mutant growth rate (AT*/Twt) at 0
+p_epi               fraction of 10,000 MCMC samples falling above the double mutant expectation
+p_tail              the fraction of samples that are in the tail of the posterior distribution (of 10,000 MCMC samples) above growth rate(AT*/Twt) if mean_fit <0, or below growth rate(AT*/Twt) if mean_fit >0
+neg_log_p_tail      significance of growing different than the antitoxin single mutant (AT*/Twt), the -log_e(p_tail)
+p_epi_tail          the fraction of samples that are in the tail of the posterior distribution (of 10,000 MCMC samples) above expected growth rate(AT*/T*) if mean_fit <expected growth rate(AT*/T*), or below expected growth rate(AT*/T*) if mean_fit > expected growth rate(AT*/T*)
+neg_log_p_epi_tail  significance of growing different than the expected double mutant growth rate(AT*/Twt), the -log_e(p_epi_tail)

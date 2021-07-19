@@ -1,3 +1,4 @@
+# the BioMicroCenter ID that maps to my primer number used, as well as the illumina multiplex index
 BMC_TO_PRIMER:
     D19-2172-1 : 178 (ATAGAGAG)
     D19-2173-1 : 179 (AGAGGATA)
@@ -33,7 +34,7 @@ BMC_TO_PRIMER:
     D19-2187-2 : 193 (TCGCATAA)
 
 
-#to split T sample by.
+# 4 nt barcodes indicating the antitoxin background found within particular sample mixes(1-4)
 #these indices are in the 5'->3' direction directly after the AAGCTT RE site
 CELL_MIX_TO_AT_INDICES:
     1 :
@@ -63,6 +64,7 @@ CELL_MIX_TO_AT_INDICES:
         - TCGA
         - GGAC
 
+# which barcodes map to which antitoxin mutant background
 AT_INDEX_TO_MUTKEY:
     CCAT : W59T
     GAGT : G62L

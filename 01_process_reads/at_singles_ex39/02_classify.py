@@ -1,13 +1,10 @@
+# classifies each read into different categories for a fasta files
+# see macpAndClassify300read() in mapClassPe
 
 from mutTools import rev_complement, fasta_iter
 from configx39 import expToInd, expToSeq
 import mapClassPe as mcp
-
-
-#fastaInDir1 = '/Users/davidd/DropboxLinks/DropboxHMS/parESingleLibrary/ex39_libraryRun/illumina/03fastqFilteredMi1/'
-#dout1 = '/Users/davidd/DropboxLinks/DropboxHMS/parESingleLibrary/ex39_libraryRun/illumina/04_class_mi1/'
-#fastaInDir2 ='/Users/davidd/DropboxLinks/DropboxHMS/parESingleLibrary/ex39_libraryRun/illumina/03fastqFilteredMi2/'
-#dout2 = '/Users/davidd/DropboxLinks/DropboxHMS/parESingleLibrary/ex39_libraryRun/illumina/04_class_mi2/'
+from constants import AT_SINGLE_FILTERED_DIR_M1, AT_SINGLE_FILTERED_DIR_M2, AT_SINGLE_CALLED_DIR_M1, AT_SINGLE_CALLED_DIR_M2
 
 def classifySamples(fastaInDir, dout):
     print 'classifying...'+fastaInDir
@@ -24,10 +21,10 @@ def classifySamples(fastaInDir, dout):
         if c%10000 == 1:
             print c
 
-fastaInDir1 = './mi1/'
-dout1='./class1/'
-fastaInDir2 = './mi2/'
-dout2='./class2/'
-
+fastaInDir1 = AT_SINGLE_FILTERED_DIR_M1
+dout1 = AT_SINGLE_CALLED_DIR_M1
 classifySamples(fastaInDir1, dout1)
+
+fastaInDir2 =AT_SINGLE_FILTERED_DIR_M2
+dout2 = AT_SINGLE_CALLED_DIR_M2
 classifySamples(fastaInDir2, dout2)

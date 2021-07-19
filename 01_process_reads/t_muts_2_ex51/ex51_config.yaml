@@ -1,3 +1,4 @@
+# map the BioMicroCenter ID to my primer number and its corresponding illumina barcoding index
 BMC_TO_PRIMER:
     D19-7910-1 : 178 (ATAGAGAG)
     D19-7911-1 : 179 (AGAGGATA)
@@ -56,7 +57,7 @@ BMC_TO_PRIMER:
     D19-7936-2 : 579 (GGGAATTG)
     D19-7937-2 : 580 (TTCCAGGT)
 
-#to split T sample by.
+#to split a sample that contains toxin single mutants in the background of different antitoxin mutant backgrounds
 #these indices are in the 5'->3' direction directly after the AAGCTT RE site
 CELL_MIX_TO_AT_INDICES:
     1 :
@@ -123,7 +124,7 @@ CELL_MIX_TO_AT_INDICES:
         - CTGC
         - GCTG
         - TCGA
-
+# dictionaries to map a 4 nucleotide barcode (on toxin vector after the 3' end and the restriction site) to an antitoxin background
 AT_INDEX_TO_MUTKEY_1:
     TATC : G62A
     CCAT : wtAT
