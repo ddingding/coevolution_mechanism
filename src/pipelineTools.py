@@ -1,4 +1,4 @@
-#pipeline tools
+# pipeline tools
 # set of functions for pre-processing of reads, like merging, quality filtering, splitting of read files.
 
 from os import listdir
@@ -11,16 +11,16 @@ from collections import defaultdict
 from mutTools import fasta_iter_py3
 import mapClassPe as mcp
 
-def merge_paired_reads_vsearch_o2(fastq1, fastq2, fout):
+
+def merge_paired_reads_vsearch_o2(fastq1, fastq2, fout,
+                                  vsearch_path='/n/groups/marks/users/david/apps/vsearch/bin/vsearch'):
     '''
     calls vsearch and merged paired end reads on the o2 cluster.
     requires a path to wherever vsearch is installed
     for vsearch intallation see: https://github.com/torognes/vsearch
     expects 2 paired end read files.
     '''
-    vsearchCmd = (
-            "/n/groups/marks/users/david/apps/vsearch/bin/vsearch "
-            + "--fastq_mergepairs %s  --reverse %s --fastqout %s_merged.fastq"
+    vsearchCmd = (vsearch_path + " --fastq_mergepairs %s  --reverse %s --fastqout %s_merged.fastq"
             % (fastq1, fastq2, fout)
     )
     print(vsearchCmd)
@@ -28,7 +28,7 @@ def merge_paired_reads_vsearch_o2(fastq1, fastq2, fout):
     return vsearchCmd
 
 
-def filter_fastq_quality(fastq_in, fasta_out):
+def filter_fastq_quality(fastq_in, fasta_out, vsearch_path='/n/groups/marks/users/david/apps/vsearch/bin/vsearch'):
     """
     Take a path to fastq_in, and specify a path to fasta_out,
     and filter merged fastq files for quality on the o2 cluster
@@ -38,10 +38,10 @@ def filter_fastq_quality(fastq_in, fasta_out):
     print(fastq_in, fasta_out)
 
     # new style formatting
-    vsearchCmd = "/n/groups/marks/users/david/apps/vsearch/bin/vsearch --fastq_filter {0} --fastq_truncqual 20 " \
-                 "--fastq_maxns 3 --fastq_maxee 0.5 --fastq_ascii 33 --fastaout {1}.fasta".format(
-        fastq_in, fasta_out
-    )
+    vsearchCmd = "{} --fastq_filter {0} --fastq_truncqual 20 " \
+                 "--fastq_maxns 3 --fastq_maxee 0.5 --fastq_ascii 33 --fastaout {1}.fasta".format(vsearch_path,
+                                                                                                  fastq_in, fasta_out
+                                                                                                  )
 
     print(vsearchCmd)
     os.system(vsearchCmd)
@@ -150,12 +150,11 @@ def demultiplex_fastas(list_fastas, fasta_dout, df_config, config_dics, exp_num=
         print("demultiplexing", fa_f)
         f_name = fa_f.split("/")[-1]
         # for x47 file naming
-        if exp_num  == 1:
+        if exp_num == 1:
             bmc_index = f_name.split('_')[1]
         # for x51 file naming
         else:
             bmc_index = f_name.split("_")[-1][:-2]
-
 
         primer_str = map_bmc_to_primer(config_dics, bmc_index)
         # check it is a toxin and needs to be demultiplexed
@@ -185,10 +184,12 @@ def map_bmc_to_primer(config_dics, bmc_index):
     primer_num = config_dics["BMC_TO_PRIMER"][bmc_index_w_lane_1_num][:3]
     return primer_num
 
+
 def map_primer_to_cell_mix(df_config, primer_str):
     # expect a primer number like 178
     # and returns whether this sample has cell mix 1, or cell mix 2
     return int(df_config.loc[df_config.primer == int(primer_str), "cell_mix"].iloc[0])
+
 
 def map_cell_mix_to_at_indices_1(config_dics, cell_mix):
     """this is for ex47
@@ -196,24 +197,26 @@ def map_cell_mix_to_at_indices_1(config_dics, cell_mix):
     # but just the top10 miniprep)
     """
 
-    if cell_mix_str not in map(str,[1,2,249]):
+    if cell_mix_str not in map(str, [1, 2, 249]):
         print('supplied cell_mix', str(cell_mix), 'doesnt have a mix of at indices.')
         return None
 
     if cell_mix_str == '1':
-        #if all mutkeys present
+        # if all mutkeys present
         at_index_to_mutkey = config_dics['AT_INDEX_TO_MUTKEY']
         return at_index_to_mutkey
 
     elif cell_mix_str == '2':
-        #if just subset of mix 2 is present.
+        # if just subset of mix 2 is present.
         indices_to_use = config_dics['CELL_MIX_TO_AT_INDICES'][cell_mix]
-        at_index_to_mutkey = dict([(k,v) for k,v in
-                config_dics['AT_INDEX_TO_MUTKEY'].items() if k in indices_to_use])
+        at_index_to_mutkey = dict([(k, v) for k, v in
+                                   config_dics['AT_INDEX_TO_MUTKEY'].items() if k in indices_to_use])
         return at_index_to_mutkey
 
     elif cell_mix_str == '249':
         return None
+
+
 def map_cell_mix_to_at_indices_2(config_dics, cell_mix):
     # this is for ex51
     # cell mix is either of 1,2,3,4, and -1 for -AT samples that were not pooled in the same flask
@@ -229,6 +232,7 @@ def map_cell_mix_to_at_indices_2(config_dics, cell_mix):
     else:
         at_index_to_mutkey = config_dics["AT_INDEX_TO_MUTKEY_" + cell_mix_str]
         return at_index_to_mutkey
+
 
 #### for 04_classify.py
 def classify_fasta(fin, fout, template):
@@ -476,29 +480,28 @@ def make_all_possible_tcs_single(sample_list, pickle_out_dir, df_config):
     return tc_list
 
 
-
 def make_all_possible_tcs(dic_samples, pickle_out_dir, df_config):
-    #expects dic_samples := 547_W59L : sample_obj
+    # expects dic_samples := 547_W59L : sample_obj
     tc_list = []
 
-    #dic_obj is a dictionary from s_name to sample_obj
-    #find the objects that are part of the same sample, gene, and mutant
+    # dic_obj is a dictionary from s_name to sample_obj
+    # find the objects that are part of the same sample, gene, and mutant
     dic_id_to_s_names = {}
     for s_name, s_obj in dic_samples.items():
         primer, mut = s_name.split('_')
         gene_sample = map_primer_to_gene_sample(primer, df_config)
-        id = gene_sample + '_'+ mut
+        id = gene_sample + '_' + mut
 
         try:
             dic_id_to_s_names[id].append(s_name)
         except KeyError:
-            dic_id_to_s_names[id] =[s_name]
+            dic_id_to_s_names[id] = [s_name]
 
     print(dic_id_to_s_names)
 
-    for id,s_names in dic_id_to_s_names.items():
+    for id, s_names in dic_id_to_s_names.items():
 
-        if len(s_names) ==2:
+        if len(s_names) == 2:
             s1_name = min(s_names, key=lambda x: dic_samples[x].timepoint)
             s2_name = max(s_names, key=lambda x: dic_samples[x].timepoint)
             s1_obj = dic_samples[s1_name]
@@ -577,4 +580,3 @@ def pair_replicate_tc(tc_list, df_config):
             tc_paired_list.append((s1_name_to_tc[s1_name], s1_name_to_tc[rep_s1_name]))
 
     return tc_paired_list
-

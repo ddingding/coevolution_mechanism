@@ -125,3 +125,157 @@ def sep_mutstr_into_codon_mutstr(full_mut_str):
             aaPosToMuts[aaPos] = str(p) + ":" + str(pos_to_mut_dic[p])
     return aaPosToMuts
 
+
+# read the single mutant count strings into dictionaries
+def count_class_file(class_fin, template, read_limit=1000000000):
+    # read all the individual lines and reads with their mutation string descriptions
+    c = 0
+    mut_type_count = defaultdict(int)
+    mut_count = defaultdict(int)
+    wt_count = defaultdict(int)
+
+    with open(class_fin, "r") as fin:
+        csvIn = csv.reader(fin, delimiter="\t")
+        for l in csvIn:
+            mut_type = l[1]
+
+            # count the number of different classified mutations
+            mut_type_count[mut_type] += 1
+
+            # deal with the codons mutants
+            if mut_type.endswith("_codons"):
+                strand = l[2]
+                mut_str = l[5]
+                mut_count[mut_str] += 1
+
+            # count the wt dna
+            if mut_type.startswith("wt_dna_"):
+                wt_count["wt"] += 1
+
+            c += 1
+            if c > read_limit:
+                break
+
+    total_reads = sum(mut_type_count.values())
+
+    # create a dataframe from this dictionary
+    cols = [
+        "wt_aa",
+        "aa_pos",
+        "mut_aa",
+        "wt_codon",
+        "codon_pos",
+        "mut_codon",
+        "raw_count"
+    ]
+
+    df_codon = pd.DataFrame(columns=cols)
+
+    # convert the single mutant counts into codon mutants
+    for mut_str, count in mut_count.items():
+        dic_codon_mutstr = sep_mutstr_into_codon_mutstr(mut_str)
+        if len(dic_codon_mutstr) == 1:
+
+            # dict to store position to the mutated base
+            mutpos_to_base = mutstr_to_dic(mut_str)
+
+            # double check it's indeed a single mutant
+            mutpos_codon_list = [int(i) // 3 for i in mutpos_to_base]
+            mutpos_codon_list = mutpos_codon_list
+            assert (
+                    len(set(mutpos_codon_list)) == 1
+            ), "mutation from mut_str found not in the same codon" + str(mut_str)
+
+            AA_pos = int(mutpos_codon_list[0])
+
+            codon_pos = AA_pos * 3
+
+            if template == "pare":
+                wt_codon = WT_PARE_DNA[codon_pos: codon_pos + 3]
+            elif template == "pard":
+                wt_codon = WT_PARD_DNA[codon_pos: codon_pos + 3]
+
+            mut_codon = mutdic_to_mutcodon(mutpos_to_base, wt_codon)
+
+            wt_aa = translate(wt_codon)
+            mut_aa = translate(mut_codon)
+
+            row = pd.Series(
+                [
+                    wt_aa,
+                    AA_pos,
+                    mut_aa,
+                    wt_codon,
+                    codon_pos,
+                    mut_codon,
+                    count,
+                ],
+                cols,
+            )
+            df_codon = df_codon.append(row, ignore_index=True)
+    df_codon['codon_mutant'] = df_codon.wt_codon + df_codon.codon_pos.astype(int).astype(str) + df_codon.mut_codon
+    df_codon['aa_mutant'] = df_codon.wt_aa + df_codon.aa_pos.astype(int).astype(str) + df_codon.mut_aa
+    return df_codon
+
+
+def get_counts_sample(class_fin, class_fin_post, template='pare'):
+    #make a single dataframe that contains read counts pre and post selection
+    df_pre = count_class_file(class_fin, template)
+    df_post = count_class_file(class_fin_post, template)
+    df_sample = df_pre.merge(df_post, left_on=['wt_codon', 'codon_pos', 'mut_codon'],
+                             right_on=['wt_codon', 'codon_pos', 'mut_codon'], suffixes=('', '_post'))
+    df_sample = df_sample.sort_values(by=['codon_pos', 'wt_aa', 'mut_aa'])
+    df_sample = df_sample[['wt_aa', 'aa_pos', 'mut_aa', 'wt_codon', 'codon_pos', 'mut_codon',
+                           'codon_mutant', 'aa_mutant', 'raw_count', 'raw_count_post']]
+    return df_sample
+
+
+def map_primer_to_gene_sample(primer_str, df_config):
+    # for a primer number, find the gene and the sample number that it belongs to,
+    # the sample number identifies the expression conditions
+    g = df_config.loc[df_config.primer == int(primer_str), "gene"].iloc[0]
+    sample = df_config.loc[df_config.primer == int(primer_str), "sample"].iloc[0]
+    return str(g) + "_" + str(sample)
+
+
+def get_f_pairs_sample(class_din, df_config, dout='./', template='pare', max_samples_read=100000000):
+    # get a dictionary of pairs of files that belong to the same sample
+    fs = [f for f in listdir(class_din) if f.endswith('class.tsv')]
+    dic_id_to_fs = {}
+    for f in fs:
+        primer, at_mut, _ = f.split('_')
+        gene_sample = map_primer_to_gene_sample(primer, df_config)
+        sample_id = gene_sample + '_' + at_mut
+        if sample_id in dic_id_to_fs:
+            dic_id_to_fs[sample_id].append(f)
+        else:
+            dic_id_to_fs[sample_id] = [f]
+
+    # create the respective count datafiles
+    sample_to_df_counts = {}
+    done_primer_at = []
+    c = 0
+    for sample_id in sorted(dic_id_to_fs.keys()):
+        f_pairs = dic_id_to_fs[sample_id]
+        # find the right files for timepoint t=0 and t=600
+        t_to_f = dict(
+            [(int(df_config.loc[df_config.primer.astype(int).astype(str) == x.split('_')[0]].t), x) for x in f_pairs])
+        print(t_to_f)
+
+        f1_name = t_to_f[0] # get the file that has the first timepoint
+        f2_name = t_to_f[600]
+        primer_at = f1_name[:-len('_class.tsv')]
+        if primer_at not in done_primer_at:
+            rep_suffix = '_rep1'
+        else:
+            rep_suffix = '_rep2'
+        f_write_name = primer_at + rep_suffix + '.csv'
+        if not isfile(dout + f_write_name):
+            df_sample_counts = get_counts_sample(class_din +f1_name,
+                                                 class_din +f2_name, template=template)
+            sample_to_df_counts[primer_at + rep_suffix] = df_sample_counts
+            df_sample_counts.to_csv(dout + f_write_name)
+        c += 1
+        if c == max_samples_read:
+            break
+    return sample_to_df_counts

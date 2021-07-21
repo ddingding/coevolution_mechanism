@@ -66,9 +66,12 @@ import os
 from os import listdir
 from os.path import isfile, join
 
+from constants import FLASH_PATH, T_SINGLE_2_RAW_DIR_M1, T_SINGLE_2_RAW_DIR_M2, T_SINGLE_2_MERGED_DIR_M1, \
+    T_SINGLE_2_MERGED_DIR_M2
 
 
-def merge_paired_end_reads(fastqPath, outputDir, fastq_suffix="_sequence.fastq"):
+def merge_paired_end_reads(fastqPath, outputDir, fastq_suffix="_sequence.fastq",
+                           flash_path='/n/groups/marks/users/david/apps/FLASH-1.2.11/flash'):
     n_to_do = 1000
     c = 0
 
@@ -87,23 +90,23 @@ def merge_paired_end_reads(fastqPath, outputDir, fastq_suffix="_sequence.fastq")
     ]
     print("fastq files to do ", sorted(fastq))
 
-
     for fa in fastq:
         if c < n_to_do:
-            flash_cmd = "/n/groups/marks/users/david/apps/FLASH-1.2.11/flash {}{}1{} {}{}2{} -o {} -d {}".format(
-                fastqPath, fa,fastq_suffix, fastqPath, fa,fastq_suffix, fa, outputDir
-            )
+            flash_cmd = " {}{}1{} {}{}2{} -o {} -d {}".format(flash_path,
+                                                              fastqPath, fa, fastq_suffix, fastqPath, fa, fastq_suffix,
+                                                              fa, outputDir
+                                                              )
             print(flash_cmd)
             os.system(flash_cmd)
             c += 1
 
 
 # for the first machine:
-fastqPath = "/n/groups/marks/users/david/ex51/00fastq_raw/"
-outputDir = "/n/groups/marks/users/david/ex51/02merged/"
-merge_paired_end_reads(fastqPath, outputDir,fastq_suffix = "_sequence.fastq")
+fastqPath = T_SINGLE_2_RAW_DIR_M1
+outputDir = T_SINGLE_2_MERGED_DIR_M1
+merge_paired_end_reads(fastqPath, outputDir, fastq_suffix="_sequence.fastq", flash_path=FLASH_PATH)
 
 # for the second machine
-fastqPath = '/n/groups/marks/users/david/ex51/00fastq_raw_4021W/'
-outputDir = '/n/groups/marks/users/david/ex51/02merged_4021W/'
-merge_paired_end_reads(fastqPath, outputDir,fastq_suffix = "_sequence_m2.fastq")
+fastqPath = T_SINGLE_2_RAW_DIR_M2
+outputDir = T_SINGLE_2_MERGED_DIR_M2
+merge_paired_end_reads(fastqPath, outputDir, fastq_suffix="_sequence_m2.fastq", flash_path=FLASH_PATH)

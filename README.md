@@ -17,12 +17,20 @@ The processing steps are:
 
 Step 5 is legacy, and could be skipped by slightly rewriting functions form step 6) to directly count variants on the step 4 output, but it's here for reproducibility purposes.
 
-Todo To run these scripts, you will have to download raw sequencing files from the SRA: https://www.ncbi.nlm.nih.gov/sra/PRJNA736482, and create directories for each experiment, and then call the scripts on these directories.
+The output of these scripts is supplied in ./01_process_reads/output/, and can then be used to perform Bayesian inference of relative growth rates for each amino acid variant.
+
+need to set python path for loading modules found in ./src/
+install flash and vsearch (for reproducibility reasons)
+
 for example:
+download files from sra: https://www.ncbi.nlm.nih.gov/sra/PRJNA736482
+unzip all the files
+for antitoxin singles mutant files only: you will have to split the .fastq files, which contain paired end reads, into separate paired end read files
+set working directory (where all the processed files should land) and download directory in constants.py
+run setup_dirs.py to create directory structure and move files to the right place.
 
 See the analysis_file_pairings.xlsx for the pre-processing code that goes with a particular file, or the initial script in each subfolder.
 
-The output of these scripts is supplied in ./01_process_reads/output/, and can then be used to perform Bayesian inference of relative growth rates for each amino acid variant.
 
 ###2. Bayesian inference of growth rates for each amino acid variant.
 To go from read counts per codon mutant in each sample, to posterior beliefs of growth rates for amino acid variants.

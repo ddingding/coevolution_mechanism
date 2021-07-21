@@ -6,6 +6,7 @@ import yaml
 import pandas as pd
 from pipelineTools import demultiplex_fastas, map_bmc_to_primer
 
+from constants import T_SINGLE_2_FILTERED_DIR_M1, T_SINGLE_2_FILTERED_DIR_M2, T_SINGLE_2_AT_SPLIT_DIR_M1, T_SINGLE_2_AT_SPLIT_DIR_M2
 ################################################################################
 # read config files
 config_dics = yaml.safe_load(open("./ex51_config.yaml", "r"))
@@ -32,7 +33,6 @@ def split_all_files(fasta_dir_in, fasta_dout):
     print(fastas)
     # take only fasta files which are not done yet.
 
-    # changed this for new filenames
     fastas = [
         f
         for f in fastas
@@ -44,12 +44,12 @@ def split_all_files(fasta_dir_in, fasta_dout):
     demultiplex_fastas(fastas, fasta_dout, df_config, config_dics)
 
 # hiseq 1 run
-fasta_dir_in = "/n/groups/marks/users/david/ex51/03filtered/"
-fasta_dout = "/n/groups/marks/users/david/ex51/04_split_by_ats/"
+fasta_dir_in = T_SINGLE_2_FILTERED_DIR_M1
+fasta_dout = T_SINGLE_2_AT_SPLIT_DIR_M1
 split_all_files(fasta_dir_in, fasta_dout)
 
 # hiseq 2 run
-fasta_dir_in = "/n/groups/marks/users/david/ex51/03filtered_4021W/"
-fasta_dout = "/n/groups/marks/users/david/ex51/04_split_by_ats_4021W/"
+fasta_dir_in = T_SINGLE_2_FILTERED_DIR_M2
+fasta_dout = T_SINGLE_2_AT_SPLIT_DIR_M2
 split_all_files(fasta_dir_in, fasta_dout)
 
