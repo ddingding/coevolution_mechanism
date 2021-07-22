@@ -279,3 +279,43 @@ def get_f_pairs_sample(class_din, df_config, dout='./', template='pare', max_sam
         if c == max_samples_read:
             break
     return sample_to_df_counts
+
+
+# add mutkey column
+def add_mutkey(df):
+    df["mutkey"] = (
+            df["wt_aa"].astype(str)
+            + df["aa_pos"].astype(int).astype(str)
+            + df["mut_aa"].astype("str")
+    )
+    return df
+
+
+def add_codonkey(df):
+    df['codonkey'] = (
+            df["wt_codon"].astype(str)
+            + df["codon_pos"].astype(int).astype(str)
+            + df["mut_codon"].astype("str")
+    )
+    return df
+
+
+def merge_df_counts(pin, pin2):
+    '''
+    expects path to 2 count files, creates mutkey and codonkey column, merges them based on codonkey.
+    used for merging replicate codon mutant count dataframes.
+    '''
+    df = pd.read_csv(pin)
+    df = add_mutkey(df)
+    df = add_codonkey(df)
+    # df_syn = df.loc[df["mutkey"].str[0] == df["mutkey"].str[-1]]
+
+    df2 = pd.read_csv(pin2)
+    df2 = add_codonkey(df2)
+    # df2_syn = df.loc[df["mutkey"].str[0] == df["mutkey"].str[-1]]
+    df_reps = df.merge(df2, left_on='codonkey', right_on='codonkey', suffixes=('_r1', '_r2'))
+    return df_reps
+
+
+
+
