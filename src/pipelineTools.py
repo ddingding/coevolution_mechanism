@@ -3,7 +3,8 @@
 
 from os import listdir
 from os.path import isfile, join
-import libClass as lc
+
+# import libClass as lc
 import pickle
 import os
 from collections import defaultdict
@@ -12,23 +13,33 @@ from mutTools import fasta_iter_py3
 import mapClassPe as mcp
 
 
-def merge_paired_reads_vsearch_o2(fastq1, fastq2, fout,
-                                  vsearch_path='/n/groups/marks/users/david/apps/vsearch/bin/vsearch'):
-    '''
+def merge_paired_reads_vsearch_o2(
+    fastq1,
+    fastq2,
+    fout,
+    vsearch_path="/n/groups/marks/users/david/apps/vsearch/bin/vsearch",
+):
+    """
     calls vsearch and merged paired end reads on the o2 cluster.
     requires a path to wherever vsearch is installed
     for vsearch intallation see: https://github.com/torognes/vsearch
     expects 2 paired end read files.
-    '''
-    vsearchCmd = (vsearch_path + " --fastq_mergepairs %s  --reverse %s --fastqout %s_merged.fastq"
-            % (fastq1, fastq2, fout)
+    """
+    vsearchCmd = (
+        vsearch_path
+        + " --fastq_mergepairs %s  --reverse %s --fastqout %s_merged.fastq"
+        % (fastq1, fastq2, fout)
     )
     print(vsearchCmd)
     os.system(vsearchCmd)
     return vsearchCmd
 
 
-def filter_fastq_quality(fastq_in, fasta_out, vsearch_path='/n/groups/marks/users/david/apps/vsearch/bin/vsearch'):
+def filter_fastq_quality(
+    fastq_in,
+    fasta_out,
+    vsearch_path="/n/groups/marks/users/david/apps/vsearch/bin/vsearch",
+):
     """
     Take a path to fastq_in, and specify a path to fasta_out,
     and filter merged fastq files for quality on the o2 cluster
@@ -38,10 +49,12 @@ def filter_fastq_quality(fastq_in, fasta_out, vsearch_path='/n/groups/marks/user
     print(fastq_in, fasta_out)
 
     # new style formatting
-    vsearchCmd = "{} --fastq_filter {0} --fastq_truncqual 20 " \
-                 "--fastq_maxns 3 --fastq_maxee 0.5 --fastq_ascii 33 --fastaout {1}.fasta".format(vsearch_path,
-                                                                                                  fastq_in, fasta_out
-                                                                                                  )
+    vsearchCmd = (
+        "{} --fastq_filter {0} --fastq_truncqual 20 "
+        "--fastq_maxns 3 --fastq_maxee 0.5 --fastq_ascii 33 --fastaout {1}.fasta".format(
+            vsearch_path, fastq_in, fasta_out
+        )
+    )
 
     print(vsearchCmd)
     os.system(vsearchCmd)
@@ -90,7 +103,7 @@ def split_by_indices(fa_f, index_to_at, dout, f_name, verbose=True):
             not_found += 1
 
         else:
-            at_ind = s[re_site_pos + 6: re_site_pos + 10]
+            at_ind = s[re_site_pos + 6 : re_site_pos + 10]
 
         # check whether the index is expected
         if at_ind in ind_to_file.keys():
@@ -125,7 +138,7 @@ def split_by_indices(fa_f, index_to_at, dout, f_name, verbose=True):
 
 
 def demultiplex_fastas(list_fastas, fasta_dout, df_config, config_dics, exp_num=1):
-    '''
+    """
     Samples of toxin single mutants in the background of different antitoxin mutants were pooled in the same flask.
     The antitoxin mutant background of a particular toxin mutant is encoded on the barcode that is 3' to the toxin
     stop codon.
@@ -140,7 +153,7 @@ def demultiplex_fastas(list_fastas, fasta_dout, df_config, config_dics, exp_num=
     :param df_config:
     :param config_dics:
     :return:
-    '''
+    """
 
     # primer nums that are toxins
     toxin_primer_nums = list(df_config.loc[df_config.gene == "t"].primer)
@@ -151,7 +164,7 @@ def demultiplex_fastas(list_fastas, fasta_dout, df_config, config_dics, exp_num=
         f_name = fa_f.split("/")[-1]
         # for x47 file naming
         if exp_num == 1:
-            bmc_index = f_name.split('_')[1]
+            bmc_index = f_name.split("_")[1]
         # for x51 file naming
         else:
             bmc_index = f_name.split("_")[-1][:-2]
@@ -198,22 +211,27 @@ def map_cell_mix_to_at_indices_1(config_dics, cell_mix):
     """
 
     if cell_mix_str not in map(str, [1, 2, 249]):
-        print('supplied cell_mix', str(cell_mix), 'doesnt have a mix of at indices.')
+        print("supplied cell_mix", str(cell_mix), "doesnt have a mix of at indices.")
         return None
 
-    if cell_mix_str == '1':
+    if cell_mix_str == "1":
         # if all mutkeys present
-        at_index_to_mutkey = config_dics['AT_INDEX_TO_MUTKEY']
+        at_index_to_mutkey = config_dics["AT_INDEX_TO_MUTKEY"]
         return at_index_to_mutkey
 
-    elif cell_mix_str == '2':
+    elif cell_mix_str == "2":
         # if just subset of mix 2 is present.
-        indices_to_use = config_dics['CELL_MIX_TO_AT_INDICES'][cell_mix]
-        at_index_to_mutkey = dict([(k, v) for k, v in
-                                   config_dics['AT_INDEX_TO_MUTKEY'].items() if k in indices_to_use])
+        indices_to_use = config_dics["CELL_MIX_TO_AT_INDICES"][cell_mix]
+        at_index_to_mutkey = dict(
+            [
+                (k, v)
+                for k, v in config_dics["AT_INDEX_TO_MUTKEY"].items()
+                if k in indices_to_use
+            ]
+        )
         return at_index_to_mutkey
 
-    elif cell_mix_str == '249':
+    elif cell_mix_str == "249":
         return None
 
 
@@ -276,8 +294,8 @@ def class_samples(fasta_dir_in, dout, df_config):
         f
         for f in listdir(fasta_dir_in)
         if isfile(join(fasta_dir_in, f))
-           and f.endswith(".fasta")
-           and not f.endswith("unexpected.fasta")
+        and f.endswith(".fasta")
+        and not f.endswith("unexpected.fasta")
     ]
 
     done_fs = [
@@ -350,6 +368,7 @@ def fetch_sample_obj_args(classIn, df_config):
     return timepoint, sample_n, template, od
 
 
+"""
 def make_sample_obj(classIn, pickle_out, df_config):
     # can also pass classIn as a list of filepaths to SampleObject to merge
     # into one sample object
@@ -410,6 +429,7 @@ def make_tc_obj(s_obj1, s_obj2, template, pickle_out_dir):
         return tc
     else:
         print("skipping: " + tc_name)
+"""
 
 
 def map_primer_to_gene_sample(primer_str, df_config):
@@ -448,7 +468,7 @@ def make_all_possible_tcs_single(sample_list, pickle_out_dir, df_config):
 
         c += 1
         if isfile(pickle_out_dir + s_names[0] + "_tc.p") or isfile(
-                pickle_out_dir + s_names[1] + "_tc.p"
+            pickle_out_dir + s_names[1] + "_tc.p"
         ):
             print("skipping s_names", c)
             continue
@@ -488,9 +508,9 @@ def make_all_possible_tcs(dic_samples, pickle_out_dir, df_config):
     # find the objects that are part of the same sample, gene, and mutant
     dic_id_to_s_names = {}
     for s_name, s_obj in dic_samples.items():
-        primer, mut = s_name.split('_')
+        primer, mut = s_name.split("_")
         gene_sample = map_primer_to_gene_sample(primer, df_config)
-        id = gene_sample + '_' + mut
+        id = gene_sample + "_" + mut
 
         try:
             dic_id_to_s_names[id].append(s_name)

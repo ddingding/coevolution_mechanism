@@ -5,24 +5,31 @@ import numpy as np
 import operator
 import matplotlib.pyplot as plt
 from itertools import groupby
+from collections import defaultdict
+import csv
+import pandas as pd
 
-from constants import CODON_TABLE
+from constants import CODON_TABLE, WT_PARE_DNA, WT_PARD_DNA
 
 
 def hamming(str1, str2):
     assert len(str1) == len(str2)
     return sum(c1 != c2 for c1, c2 in zip(str1, str2))
 
+
 def complement(inbase):
     cDic = {"A": "T", "T": "A", "C": "G", "G": "C"}
     return cDic[inbase]
+
 
 def rev_complement(instr):
     compl = [complement(c) for c in instr]
     return "".join(compl[::-1])
 
+
 def translate(inCodon):
     return CODON_TABLE[inCodon]
+
 
 def fasta_iter(fasta_name):
     """ works for python 2 only
@@ -38,6 +45,7 @@ def fasta_iter(fasta_name):
         # join all sequence lines to one.
         seq = "".join(s.strip() for s in faiter.next())
         yield header, seq
+
 
 def fasta_iter_py3(fasta_name):
     """
@@ -70,6 +78,7 @@ class FastaRecord:
     def __str__(self):
         return ">{}\n{}".format(self.header, self.sequence)
 
+
 def mutstr_to_dic(mutStr):
     # take mutstr like '4:T,5:A,8:A' and make a dictionary of position to mutant nt
     return dict(
@@ -78,6 +87,7 @@ def mutstr_to_dic(mutStr):
             [x.split(":")[1] for x in mutStr.split(",")],
         )
     )
+
 
 def mutdic_to_mutcodon(mutpos_to_base, wtCodon):
     # take  {'100': 'A', '101': 'G'} and convert to mutcodon, which is a 3 letter base string.
@@ -102,6 +112,7 @@ def mutStrToTupleList(mutStr):
         [(int(mut.split(":")[0]), mut.split(":")[1]) for mut in mut_list],
         key=operator.itemgetter(0),
     )
+
 
 def sep_mutstr_into_codon_mutstr(full_mut_str):
     """
@@ -166,7 +177,7 @@ def count_class_file(class_fin, template, read_limit=1000000000):
         "wt_codon",
         "codon_pos",
         "mut_codon",
-        "raw_count"
+        "raw_count",
     ]
 
     df_codon = pd.DataFrame(columns=cols)
@@ -183,7 +194,7 @@ def count_class_file(class_fin, template, read_limit=1000000000):
             mutpos_codon_list = [int(i) // 3 for i in mutpos_to_base]
             mutpos_codon_list = mutpos_codon_list
             assert (
-                    len(set(mutpos_codon_list)) == 1
+                len(set(mutpos_codon_list)) == 1
             ), "mutation from mut_str found not in the same codon" + str(mut_str)
 
             AA_pos = int(mutpos_codon_list[0])
@@ -191,9 +202,9 @@ def count_class_file(class_fin, template, read_limit=1000000000):
             codon_pos = AA_pos * 3
 
             if template == "pare":
-                wt_codon = WT_PARE_DNA[codon_pos: codon_pos + 3]
+                wt_codon = WT_PARE_DNA[codon_pos : codon_pos + 3]
             elif template == "pard":
-                wt_codon = WT_PARD_DNA[codon_pos: codon_pos + 3]
+                wt_codon = WT_PARD_DNA[codon_pos : codon_pos + 3]
 
             mut_codon = mutdic_to_mutcodon(mutpos_to_base, wt_codon)
 
@@ -201,32 +212,45 @@ def count_class_file(class_fin, template, read_limit=1000000000):
             mut_aa = translate(mut_codon)
 
             row = pd.Series(
-                [
-                    wt_aa,
-                    AA_pos,
-                    mut_aa,
-                    wt_codon,
-                    codon_pos,
-                    mut_codon,
-                    count,
-                ],
-                cols,
+                [wt_aa, AA_pos, mut_aa, wt_codon, codon_pos, mut_codon, count], cols
             )
             df_codon = df_codon.append(row, ignore_index=True)
-    df_codon['codon_mutant'] = df_codon.wt_codon + df_codon.codon_pos.astype(int).astype(str) + df_codon.mut_codon
-    df_codon['aa_mutant'] = df_codon.wt_aa + df_codon.aa_pos.astype(int).astype(str) + df_codon.mut_aa
+    df_codon["codon_mutant"] = (
+        df_codon.wt_codon
+        + df_codon.codon_pos.astype(int).astype(str)
+        + df_codon.mut_codon
+    )
+    df_codon["aa_mutant"] = (
+        df_codon.wt_aa + df_codon.aa_pos.astype(int).astype(str) + df_codon.mut_aa
+    )
     return df_codon
 
 
-def get_counts_sample(class_fin, class_fin_post, template='pare'):
-    #make a single dataframe that contains read counts pre and post selection
+def get_counts_sample(class_fin, class_fin_post, template="pare"):
+    # make a single dataframe that contains read counts pre and post selection
     df_pre = count_class_file(class_fin, template)
     df_post = count_class_file(class_fin_post, template)
-    df_sample = df_pre.merge(df_post, left_on=['wt_codon', 'codon_pos', 'mut_codon'],
-                             right_on=['wt_codon', 'codon_pos', 'mut_codon'], suffixes=('', '_post'))
-    df_sample = df_sample.sort_values(by=['codon_pos', 'wt_aa', 'mut_aa'])
-    df_sample = df_sample[['wt_aa', 'aa_pos', 'mut_aa', 'wt_codon', 'codon_pos', 'mut_codon',
-                           'codon_mutant', 'aa_mutant', 'raw_count', 'raw_count_post']]
+    df_sample = df_pre.merge(
+        df_post,
+        left_on=["wt_codon", "codon_pos", "mut_codon"],
+        right_on=["wt_codon", "codon_pos", "mut_codon"],
+        suffixes=("", "_post"),
+    )
+    df_sample = df_sample.sort_values(by=["codon_pos", "wt_aa", "mut_aa"])
+    df_sample = df_sample[
+        [
+            "wt_aa",
+            "aa_pos",
+            "mut_aa",
+            "wt_codon",
+            "codon_pos",
+            "mut_codon",
+            "codon_mutant",
+            "aa_mutant",
+            "raw_count",
+            "raw_count_post",
+        ]
+    ]
     return df_sample
 
 
@@ -238,14 +262,16 @@ def map_primer_to_gene_sample(primer_str, df_config):
     return str(g) + "_" + str(sample)
 
 
-def get_f_pairs_sample(class_din, df_config, dout='./', template='pare', max_samples_read=100000000):
+def get_f_pairs_sample(
+    class_din, df_config, dout="./", template="pare", max_samples_read=100000000
+):
     # get a dictionary of pairs of files that belong to the same sample
-    fs = [f for f in listdir(class_din) if f.endswith('class.tsv')]
+    fs = [f for f in listdir(class_din) if f.endswith("class.tsv")]
     dic_id_to_fs = {}
     for f in fs:
-        primer, at_mut, _ = f.split('_')
+        primer, at_mut, _ = f.split("_")
         gene_sample = map_primer_to_gene_sample(primer, df_config)
-        sample_id = gene_sample + '_' + at_mut
+        sample_id = gene_sample + "_" + at_mut
         if sample_id in dic_id_to_fs:
             dic_id_to_fs[sample_id].append(f)
         else:
@@ -259,20 +285,32 @@ def get_f_pairs_sample(class_din, df_config, dout='./', template='pare', max_sam
         f_pairs = dic_id_to_fs[sample_id]
         # find the right files for timepoint t=0 and t=600
         t_to_f = dict(
-            [(int(df_config.loc[df_config.primer.astype(int).astype(str) == x.split('_')[0]].t), x) for x in f_pairs])
+            [
+                (
+                    int(
+                        df_config.loc[
+                            df_config.primer.astype(int).astype(str) == x.split("_")[0]
+                        ].t
+                    ),
+                    x,
+                )
+                for x in f_pairs
+            ]
+        )
         print(t_to_f)
 
-        f1_name = t_to_f[0] # get the file that has the first timepoint
+        f1_name = t_to_f[0]  # get the file that has the first timepoint
         f2_name = t_to_f[600]
-        primer_at = f1_name[:-len('_class.tsv')]
+        primer_at = f1_name[: -len("_class.tsv")]
         if primer_at not in done_primer_at:
-            rep_suffix = '_rep1'
+            rep_suffix = "_rep1"
         else:
-            rep_suffix = '_rep2'
-        f_write_name = primer_at + rep_suffix + '.csv'
+            rep_suffix = "_rep2"
+        f_write_name = primer_at + rep_suffix + ".csv"
         if not isfile(dout + f_write_name):
-            df_sample_counts = get_counts_sample(class_din +f1_name,
-                                                 class_din +f2_name, template=template)
+            df_sample_counts = get_counts_sample(
+                class_din + f1_name, class_din + f2_name, template=template
+            )
             sample_to_df_counts[primer_at + rep_suffix] = df_sample_counts
             df_sample_counts.to_csv(dout + f_write_name)
         c += 1
@@ -284,27 +322,27 @@ def get_f_pairs_sample(class_din, df_config, dout='./', template='pare', max_sam
 # add mutkey column
 def add_mutkey(df):
     df["mutkey"] = (
-            df["wt_aa"].astype(str)
-            + df["aa_pos"].astype(int).astype(str)
-            + df["mut_aa"].astype("str")
+        df["wt_aa"].astype(str)
+        + df["aa_pos"].astype(int).astype(str)
+        + df["mut_aa"].astype("str")
     )
     return df
 
 
 def add_codonkey(df):
-    df['codonkey'] = (
-            df["wt_codon"].astype(str)
-            + df["codon_pos"].astype(int).astype(str)
-            + df["mut_codon"].astype("str")
+    df["codonkey"] = (
+        df["wt_codon"].astype(str)
+        + df["codon_pos"].astype(int).astype(str)
+        + df["mut_codon"].astype("str")
     )
     return df
 
 
 def merge_df_counts(pin, pin2):
-    '''
+    """
     expects path to 2 count files, creates mutkey and codonkey column, merges them based on codonkey.
     used for merging replicate codon mutant count dataframes.
-    '''
+    """
     df = pd.read_csv(pin)
     df = add_mutkey(df)
     df = add_codonkey(df)
@@ -313,9 +351,7 @@ def merge_df_counts(pin, pin2):
     df2 = pd.read_csv(pin2)
     df2 = add_codonkey(df2)
     # df2_syn = df.loc[df["mutkey"].str[0] == df["mutkey"].str[-1]]
-    df_reps = df.merge(df2, left_on='codonkey', right_on='codonkey', suffixes=('_r1', '_r2'))
+    df_reps = df.merge(
+        df2, left_on="codonkey", right_on="codonkey", suffixes=("_r1", "_r2")
+    )
     return df_reps
-
-
-
-

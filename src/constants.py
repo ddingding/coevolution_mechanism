@@ -1,7 +1,7 @@
 #######################################################################################################################
 # Paths to set on your local machine
-DL_DIR = './'  # set this path to where the sra files have been downloaded to
-WORK_DIR = './'  # set this path to where you want the processed files to be
+DL_DIR = '/n/groups/marks/users/david/sra_all/dl_test/'  # set this path to where the sra files have been downloaded to
+WORK_DIR = '/n/groups/marks/users/david/sra_all/coev_work/'  # set this path to where you want the processed files to be
 
 # external tool paths:
 FLASH_PATH = '/n/groups/marks/users/david/apps/FLASH-1.2.11/flash'
@@ -30,7 +30,7 @@ AT_SINGLE_FILTERED_DIR_M2 = AT_SINGLE_DIR + '03_filtered_m2/'
 AT_SINGLE_CALLED_DIR_M1 = AT_SINGLE_DIR + '04_called_mi1/'
 AT_SINGLE_CALLED_DIR_M2 = AT_SINGLE_DIR + '04_called_mi2/'
 AT_SINGLE_CALLED_DIR_BOTH = AT_SINGLE_DIR + '04_called_both/'
-AT_SINGLE_COUNTED_DIR = AT_SINGLE_DIR + '04_counted/'
+AT_SINGLE_COUNTED_DIR = AT_SINGLE_DIR + '05_counted/'
 AT_SINGLE_DIRS = [
     AT_SINGLE_DIR, AT_SINGLE_RAW_DIR_M1, AT_SINGLE_RAW_DIR_M2, AT_SINGLE_MERGED_DIR_M1, AT_SINGLE_MERGED_DIR_M2,
     AT_SINGLE_FILTERED_DIR_M1, AT_SINGLE_FILTERED_DIR_M2, AT_SINGLE_CALLED_DIR_M1, AT_SINGLE_CALLED_DIR_M2,

@@ -1,4 +1,4 @@
-'''
+"""
 # this script merged paired end reads using usearch
 # and does quality filtering of the merged reads, see below.
 
@@ -20,42 +20,60 @@ files to be compatible with this script with '1_sequence.fastq' for read 1 and '
 180716Lau_D18-6083_phiX_bestmap.fastq --> '180716Lau_D18-6083_phiX_bestmap_1_sequence.fastq',
 '180716Lau_D18-6083_phiX_bestmap_2_sequence.fastq'
 
-'''
+"""
 import os
 from os import listdir
 from os.path import isfile, join
 
-from configx39 import expToInd
 from mutTools import rev_complement
-from constants import AT_SINGLE_RAW_DIR_M1, AT_SINGLE_RAW_DIR_M2, AT_SINGLE_MERGED_DIR_M1, AT_SINGLE_MERGED_DIR_M2, \
-    AT_SINGLE_FILTERED_DIR_M1, AT_SINGLE_FILTERED_DIR_M2, USEARCH_PATH
+from constants import (
+    AT_SINGLE_RAW_DIR_M1,
+    AT_SINGLE_RAW_DIR_M2,
+    AT_SINGLE_MERGED_DIR_M1,
+    AT_SINGLE_MERGED_DIR_M2,
+    AT_SINGLE_FILTERED_DIR_M1,
+    AT_SINGLE_FILTERED_DIR_M2,
+    VSEARCH_PATH,
+)
 
 
 ########################################################################################################################
 # merge each pair of paired end reads from separate files
-def merge_reads(fastqPath, outputDir,
-                usearch_path='/Users/davidd/DropboxLinks/DropboxHMS/parESingleLibrary/ex8/Illumina/fastqProcessing'
-                             '/usearch'):
-    with open(outputDir + 'cmdsUsed.txt', 'w') as fout:
-        for ind in expToInd.values():
-            ind = rev_complement(ind)
-            usearchCmd = usearch_path + ' -fastq_mergepairs %s  -reverse %s -fastqout %s_merged.fastq' \
-                         % (
-                         fastqPath + ind + '_1_sequence.fastq', fastqPath + ind + '_2_sequence.fastq', outputDir + ind)
-            print usearchCmd
+def merge_reads(
+    fastqPath,
+    outputDir,
+    usearch_path="/Users/davidd/DropboxLinks/DropboxHMS/parESingleLibrary/ex8/Illumina/fastqProcessing"
+    "/usearch",
+):
+    fastqs = [f for f in listdir(fastqPath) if f.endswith(".fastq")]
+    samples = set([f[: -len("_1_sequence.fastq")] for f in fastqs])
+    print(samples)
+    with open(outputDir + "cmdsUsed.txt", "w") as fout:
+        for s in samples:
+            usearchCmd = (
+                usearch_path
+                + " -fastq_mergepairs %s  -reverse %s -fastqout %s_merged.fastq"
+                % (
+                    fastqPath + s + "_1_sequence.fastq",
+                    fastqPath + s + "_2_sequence.fastq",
+                    outputDir + s,
+                )
+            )
+            print(usearchCmd)
             os.system(usearchCmd)
             fout.write(usearchCmd)
 
 
+print("merging reads")
 # merge from first miseq
 fastqPath = AT_SINGLE_RAW_DIR_M1
 outputDir = AT_SINGLE_MERGED_DIR_M1
-merge_reads(fastqPath, outputDir, usearch_path=USEARCH_PATH)
+merge_reads(fastqPath, outputDir, usearch_path=VSEARCH_PATH)
 
 # merge from second miseq
 fastqPath = AT_SINGLE_RAW_DIR_M2
 outputDir = AT_SINGLE_MERGED_DIR_M2
-merge_reads(fastqPath, outputDir, usearch_path=USEARCH_PATH)
+merge_reads(fastqPath, outputDir, usearch_path=VSEARCH_PATH)
 
 
 ########################################################################################################################
@@ -63,24 +81,32 @@ merge_reads(fastqPath, outputDir, usearch_path=USEARCH_PATH)
 
 # for the first set
 
-def filter_quality(fastqPath, outputDir, usearch_path):
-    fastq = [f for f in listdir(fastqPath) if isfile(join(fastqPath, f))]
-    with open(outputDir + 'cmdsUsed.txt', 'w') as fout:
-        for fi in fastq:
-            usearchCmd = usearch_path + ' -fastq_filter %s -fastq_truncqual 20 -fastq_maxns 3 -fastq_maxee 0.5 ' \
-                                        '-fastq_ascii 33 ' \
-                                        '-fastaout %s.fasta' \
-                         % (fastqPath + fi, outputDir + fi[:-6])
 
-            print usearchCmd
+def filter_quality(fastqPath, outputDir, usearch_path):
+    fastq = [
+        f
+        for f in listdir(fastqPath)
+        if isfile(join(fastqPath, f)) and f.endswith(".fastq")
+    ]
+    with open(outputDir + "cmdsUsed.txt", "w") as fout:
+        for fi in fastq:
+            usearchCmd = (
+                usearch_path
+                + " -fastq_filter %s -fastq_truncqual 20 -fastq_maxns 3 -fastq_maxee 0.5 "
+                "-fastq_ascii 33 "
+                "-fastaout %s.fasta" % (fastqPath + fi, outputDir + fi[:-6])
+            )
+
+            print(usearchCmd)
             os.system(usearchCmd)
             fout.write(usearchCmd)
 
 
+print("filtering reads...")
 fastqPath1 = AT_SINGLE_MERGED_DIR_M1
 outputDir1 = AT_SINGLE_FILTERED_DIR_M1
-filter_quality(fastqPath1, outputDir1, usearch_path=USEARCH_PATH)
+filter_quality(fastqPath1, outputDir1, usearch_path=VSEARCH_PATH)
 
 fastqPath2 = AT_SINGLE_MERGED_DIR_M2
 outputDir2 = AT_SINGLE_FILTERED_DIR_M2
-filter_quality(fastqPath2, outputDir2, usearch_path=USEARCH_PATH)
+filter_quality(fastqPath2, outputDir2, usearch_path=VSEARCH_PATH)

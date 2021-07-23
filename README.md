@@ -12,22 +12,18 @@ The processing steps are:
 2) quality filter reads
 3) optional: split files by antitoxin barcodes, if toxin single mutants have been run pooled in a flask
 4) classify each read into different categories, such as single codon variants
-5) convert these classified reads into structured python objects: Sample Object for each sample and timepoint, or Timecourse object, which links Sample objects for a particular flask across timepoints
-6) convert these sample or time course objects into tabular form detailing pre- and post selection read counts. ./01_process_reads/06_make_raw_count_df.py 
+5) count the mutants, create a table detailing pre- and post selection read counts
 
-Step 5 is legacy, and could be skipped by slightly rewriting functions form step 6) to directly count variants on the step 4 output, but it's here for reproducibility purposes.
+Steps:
+1) need to set python path for loading modules found in ./src/, ie. source source_modules.sh
+2) install flash and vsearch and set the path in ./src/constants.py
+3) download files from sra: https://www.ncbi.nlm.nih.gov/sra/PRJNA736482, unzip all the files
+3b) for antitoxin singles mutant files only: you will have to split the .fastq files, which contain paired end reads, into separate paired end read files
+4) set working directory (where all the processed files should land) and download directory in ./src/constants.py
+5) run ./setup_dirs.py to create directory structure and move files to the right place.
+6) run the scripts in each folder of ./01_process_reads/
 
 The output of these scripts is supplied in ./01_process_reads/output/, and can then be used to perform Bayesian inference of relative growth rates for each amino acid variant.
-
-need to set python path for loading modules found in ./src/
-install flash and vsearch (for reproducibility reasons)
-
-for example:
-download files from sra: https://www.ncbi.nlm.nih.gov/sra/PRJNA736482
-unzip all the files
-for antitoxin singles mutant files only: you will have to split the .fastq files, which contain paired end reads, into separate paired end read files
-set working directory (where all the processed files should land) and download directory in constants.py
-run setup_dirs.py to create directory structure and move files to the right place.
 
 See the analysis_file_pairings.xlsx for the pre-processing code that goes with a particular file, or the initial script in each subfolder.
 

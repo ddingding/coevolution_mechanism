@@ -17,6 +17,7 @@ from exp_to_files import at_single_machine1_files, at_single_machine2_files, \
 
 ########################################################################################################################
 # create directories for processing
+print('creating dirs...')
 for d in T_SINGLE_1_DIRS + T_SINGLE_2_DIRS + AT_SINGLE_DIRS + AT_COMBO_DIRS:
     os.system('mkdir {}'.format(d))
 
@@ -24,24 +25,30 @@ for d in T_SINGLE_1_DIRS + T_SINGLE_2_DIRS + AT_SINGLE_DIRS + AT_COMBO_DIRS:
 # moving raw fastq files into the respective directories
 
 
-
+print('moving at combo files...')
 for f in at_combo_files:
     os.system('mv {}{} {}'.format(DL_DIR, f, AT_COMBO_RAW_DIR))
 
+print('moving at single files machine 1...')
 for f in at_single_machine1_files:
     os.system('mv {}{} {}'.format(DL_DIR, f, AT_SINGLE_RAW_DIR_M1))
 
+print('moving at single files machine 2...')
 for f in at_single_machine2_files:
     os.system('mv {}{} {}'.format(DL_DIR, f, AT_SINGLE_RAW_DIR_M2))
 
+print('moving t single 1 files machine 1...')
 for f in t_muts_1_machine1_files:
     os.system('mv {}{} {}'.format(DL_DIR, f, T_SINGLE_1_RAW_DIR_M1))
 
+print('moving t single files machine 2...')
 for f in t_muts_1_machine2_files:
     os.system('mv {}{} {}'.format(DL_DIR, f, T_SINGLE_1_RAW_DIR_M2))
 
+print('moving t single 2 files machine 1...')
 for f in t_muts_2_machine1_files:
     os.system('mv {}{} {}'.format(DL_DIR, f, T_SINGLE_2_RAW_DIR_M1))
 
-for f in t_muts_1_machine2_files:
+print('moving t single 2 files machine 2...')
+for f in t_muts_2_machine2_files:
     os.system('mv {}{} {}'.format(DL_DIR, f, T_SINGLE_2_RAW_DIR_M2))
