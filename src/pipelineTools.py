@@ -38,7 +38,7 @@ def merge_paired_reads_vsearch_o2(
 def filter_fastq_quality(
     fastq_in,
     fasta_out,
-    vsearch_path="/n/groups/marks/users/david/apps/vsearch/bin/vsearch",
+    vsearch_path="/n/groups/marks/users/david/apps/vsearch/bin/vsearch"
 ):
     """
     Take a path to fastq_in, and specify a path to fasta_out,
@@ -50,10 +50,7 @@ def filter_fastq_quality(
 
     # new style formatting
     vsearchCmd = (
-        "{} --fastq_filter {0} --fastq_truncqual 20 "
-        "--fastq_maxns 3 --fastq_maxee 0.5 --fastq_ascii 33 --fastaout {1}.fasta".format(
-            vsearch_path, fastq_in, fasta_out
-        )
+        "{} --fastq_filter {} --fastq_truncqual 20 --fastq_maxns 3 --fastq_maxee 0.5 --fastq_ascii 33 --fastaout {}.fasta".format(vsearch_path, fastq_in, fasta_out)
     )
 
     print(vsearchCmd)

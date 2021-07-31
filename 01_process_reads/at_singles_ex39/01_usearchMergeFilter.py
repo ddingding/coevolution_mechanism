@@ -1,6 +1,10 @@
 """
-# this script merged paired end reads using usearch
+# this script merged paired end reads using vsearch
 # and does quality filtering of the merged reads, see below.
+Note that we previously ran usearch, instead of vsearch,
+so running through this pipeline results in very slight differences
+in read counts per mutants for a few mutants than what we used for bayesian inference throughout the paper
+and what we supplied in ../../data/
 
 # this is applicable to 2 MiSeq files
 miseq run 1 files are:

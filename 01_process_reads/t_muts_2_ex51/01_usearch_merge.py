@@ -74,17 +74,11 @@ def merge_paired_end_reads(fastqPath, outputDir, fastq_suffix="_sequence.fastq",
                            flash_path='/n/groups/marks/users/david/apps/FLASH-1.2.11/flash'):
     n_to_do = 1000
     c = 0
-
-    # get a list of files that are already merged.
-    done_nums = [
-        f.rstrip("-_merged.fastq")[-3:]
-        for f in listdir(outputDir)
-        if isfile(join(outputDir, f))
-    ]
+ 
     print("doing filepahts:{}{}".format(fastqPath, outputDir))
-    print("file numbers already done:", done_nums)
+    # example file names: 190716Lau_D19-7937-2_1_sequence_m2.fastq, 190716Lau_D19-7930-2_2_sequence.fastq
     fastq = [
-        f.rstrip(fastq_suffix)[:-1]
+        f[:len('190716Lau_D19-7937-2_')]
         for f in listdir(fastqPath)
         if isfile(join(fastqPath, f))
     ]
@@ -92,7 +86,7 @@ def merge_paired_end_reads(fastqPath, outputDir, fastq_suffix="_sequence.fastq",
 
     for fa in fastq:
         if c < n_to_do:
-            flash_cmd = " {}{}1{} {}{}2{} -o {} -d {}".format(flash_path,
+            flash_cmd = "{} {}{}1{} {}{}2{} -o {} -d {}".format(flash_path,
                                                               fastqPath, fa, fastq_suffix, fastqPath, fa, fastq_suffix,
                                                               fa, outputDir
                                                               )

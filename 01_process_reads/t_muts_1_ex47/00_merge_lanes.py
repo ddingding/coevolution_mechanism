@@ -90,7 +90,7 @@ def merge_fwd_and_rev_reads(fastq, fastqPath, mergedPath, f_suffix = 'sequence.f
                      mergedPath + f + '1_sequence.fastq')
 
         # merge rev read 2 from lane 1 and lane 2
-        cocnat_files([fastqPath + f + '1_2_'+f_suffix,
+        concat_files([fastqPath + f + '1_2_'+f_suffix,
                       fastqPath + f + '2_2_'+ f_suffix],
                      mergedPath + f + '2_sequence.fastq')
 

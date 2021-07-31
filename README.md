@@ -15,7 +15,7 @@ The processing steps are:
 5) count the mutants, create a table detailing pre- and post selection read counts
 
 Steps:
-1) need to set python path for loading modules found in ./src/, ie. source source_modules.sh
+1) need to set python path for loading modules found in ./src/, so run: source source_modules.sh
 2) install flash and vsearch and set the path in ./src/constants.py
 3) download files from sra: https://www.ncbi.nlm.nih.gov/sra/PRJNA736482, unzip all the files
 3b) for antitoxin singles mutant files only: you will have to split the .fastq files, which contain paired end reads, into separate paired end read files
