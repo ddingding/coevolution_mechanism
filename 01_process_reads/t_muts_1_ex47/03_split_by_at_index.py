@@ -20,7 +20,7 @@ from constants import T_SINGLE_1_FILTERED_DIR_M1, T_SINGLE_1_FILTERED_DIR_M2, T_
 config_dics = yaml.safe_load(open('./ex47_config.yaml', 'r'))
 df_config = pd.read_csv(open('./ex47_config.csv', 'r'))
 ################################################################################
-def demultiplex_ats_all_fastas(fasta_dir_in, fasta_dout, config_dics, df_config):
+def demultiplex_ats_all_fastas(fasta_dir_in, fasta_dout, config_dics, df_config, fa_suffix = ''):
     # select fasta files to process
     fastas = [fasta_dir_in + f for f in listdir(fasta_dir_in) if isfile(join(fasta_dir_in, f)) and
               f.endswith('.fasta')]
@@ -35,7 +35,7 @@ def demultiplex_ats_all_fastas(fasta_dir_in, fasta_dout, config_dics, df_config)
 
     print(fastas)
 
-    demultiplex_fastas(fastas, fasta_dout, df_config, config_dics)
+    demultiplex_fastas(fastas, fasta_dout, df_config, config_dics, fa_suffix='')
 
 
 # hiseq machine 1 results

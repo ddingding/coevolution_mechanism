@@ -8,6 +8,8 @@ from itertools import groupby
 from collections import defaultdict
 import csv
 import pandas as pd
+from os import listdir
+from os.path import isfile, join
 
 from constants import CODON_TABLE, WT_PARE_DNA, WT_PARD_DNA
 
@@ -303,6 +305,7 @@ def get_f_pairs_sample(
         f2_name = t_to_f[600]
         primer_at = f1_name[: -len("_class.tsv")]
         if primer_at not in done_primer_at:
+            done_primer_at.append(primer_at)
             rep_suffix = "_rep1"
         else:
             rep_suffix = "_rep2"

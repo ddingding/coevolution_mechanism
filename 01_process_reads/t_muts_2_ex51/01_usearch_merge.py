@@ -86,7 +86,7 @@ def merge_paired_end_reads(fastqPath, outputDir, fastq_suffix="_sequence.fastq",
 
     for fa in fastq:
         if c < n_to_do:
-            flash_cmd = "{} {}{}1{} {}{}2{} -o {} -d {}".format(flash_path,
+            flash_cmd = "{} {}{}1{} {}{}2{} --max-overlap 300 -o {} -d {}".format(flash_path,
                                                               fastqPath, fa, fastq_suffix, fastqPath, fa, fastq_suffix,
                                                               fa, outputDir
                                                               )

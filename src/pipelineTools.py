@@ -38,7 +38,8 @@ def merge_paired_reads_vsearch_o2(
 def filter_fastq_quality(
     fastq_in,
     fasta_out,
-    vsearch_path="/n/groups/marks/users/david/apps/vsearch/bin/vsearch"
+    vsearch_path="/n/groups/marks/users/david/apps/vsearch/bin/vsearch",
+    execute=True
 ):
     """
     Take a path to fastq_in, and specify a path to fasta_out,
@@ -49,12 +50,13 @@ def filter_fastq_quality(
     print(fastq_in, fasta_out)
 
     # new style formatting
-    vsearchCmd = (
-        "{} --fastq_filter {} --fastq_truncqual 20 --fastq_maxns 3 --fastq_maxee 0.5 --fastq_ascii 33 --fastaout {}.fasta".format(vsearch_path, fastq_in, fasta_out)
+    vsearchCmd = "{} --fastq_filter {} --fastq_truncqual 20 --fastq_maxns 3 --fastq_maxee 0.5 --fastq_ascii 33 --fastaout {}.fasta".format(
+        vsearch_path, fastq_in, fasta_out
     )
 
     print(vsearchCmd)
-    os.system(vsearchCmd)
+    if execute:
+        os.system(vsearchCmd)
     return vsearchCmd
 
 
@@ -134,7 +136,15 @@ def split_by_indices(fa_f, index_to_at, dout, f_name, verbose=True):
         f.close()
 
 
-def demultiplex_fastas(list_fastas, fasta_dout, df_config, config_dics, exp_num=1):
+def demultiplex_fastas(
+    list_fastas,
+    fasta_dout,
+    df_config,
+    config_dics,
+    exp_num=1,
+    fa_suffix="_.extendedFrags.fasta",
+    execute = True
+):
     """
     Samples of toxin single mutants in the background of different antitoxin mutants were pooled in the same flask.
     The antitoxin mutant background of a particular toxin mutant is encoded on the barcode that is 3' to the toxin
@@ -164,34 +174,54 @@ def demultiplex_fastas(list_fastas, fasta_dout, df_config, config_dics, exp_num=
             bmc_index = f_name.split("_")[1]
         # for x51 file naming
         else:
-            bmc_index = f_name.split("_")[-1][:-2]
+            
+            bmc_index = f_name.split("_")[1][:-2]
+            print('bmc_index',bmc_index)
+        # for ex47
+        if exp_num == 1:
+            primer_str = map_bmc_to_primer(config_dics, bmc_index, lane_suffix="-1")
+        # for ex51
+        else:
+            primer_str = map_bmc_to_primer(config_dics, bmc_index, lane_suffix="")
 
-        primer_str = map_bmc_to_primer(config_dics, bmc_index)
         # check it is a toxin and needs to be demultiplexed
         if float(primer_str) in toxin_primer_nums:
             # fetch cell_mix number by my primer number
             cell_mix = map_primer_to_cell_mix(df_config, primer_str)
             print(primer_str, cell_mix)
             if exp_num == 1:
+                # for t_muts_1
                 at_index_to_mutkey = map_cell_mix_to_at_indices_1(config_dics, cell_mix)
             else:
+                # for t_muts_2
                 at_index_to_mutkey = map_cell_mix_to_at_indices_2(config_dics, cell_mix)
 
             print(at_index_to_mutkey)
             if at_index_to_mutkey:
                 f_name = str(primer_str)
                 # for x51
-                fa_f = fa_f + "_.extendedFrags.fasta"
-                split_by_indices(fa_f, at_index_to_mutkey, fasta_dout, f_name)
+                fa_f = fa_f + fa_suffix
+                print('split by indices args:',fa_f, at_index_to_mutkey, fasta_dout, f_name)
+                if execute:
+                    split_by_indices(fa_f, at_index_to_mutkey, fasta_dout, f_name)
 
 
-def map_bmc_to_primer(config_dics, bmc_index):
+def map_bmc_to_primer(config_dics, bmc_index, lane_suffix="-1"):
     # expects bmc_index like D19-2181
     # returns my own primer name like 187
-    bmc_index_w_lane_1_num = bmc_index + "-1"
+    if len(lane_suffix) != 0:
+        bmc_index_w_lane_1_num = bmc_index + lane_suffix
+        # only first 3 characters are primer, the rest is the index sequence
+        primer_num = config_dics["BMC_TO_PRIMER"][bmc_index_w_lane_1_num][:3]
+    else:
+        bmc_index_w_lane_1_num = bmc_index + "-1"
+        bmc_index_w_lane_2_num = bmc_index + "-2"
 
-    # only first 3 characters are primer, the rest is the index sequence
-    primer_num = config_dics["BMC_TO_PRIMER"][bmc_index_w_lane_1_num][:3]
+        try:
+            primer_num = config_dics["BMC_TO_PRIMER"][bmc_index_w_lane_1_num][:3]
+        except KeyError:
+            primer_num = config_dics["BMC_TO_PRIMER"][bmc_index_w_lane_2_num][:3]
+
     return primer_num
 
 
@@ -206,9 +236,12 @@ def map_cell_mix_to_at_indices_1(config_dics, cell_mix):
     # cell_mix is either 1, 2, or 249 (the toxin sample that is not a pool,
     # but just the top10 miniprep)
     """
+    cell_mix_str = str(cell_mix)
+    if cell_mix_str not in ["1", "2", "249"]:
 
-    if cell_mix_str not in map(str, [1, 2, 249]):
-        print("supplied cell_mix", str(cell_mix), "doesnt have a mix of at indices.")
+        print(
+            "supplied cell_mix", str(cell_mix_str), "doesnt have a mix of at indices."
+        )
         return None
 
     if cell_mix_str == "1":
