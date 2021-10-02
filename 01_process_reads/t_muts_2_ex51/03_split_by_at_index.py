@@ -41,7 +41,7 @@ def split_all_files(fasta_dir_in, fasta_dout):
 
     print(fastas)
 
-    demultiplex_fastas(fastas, fasta_dout, df_config, config_dics, exp_num=2, execute=False)
+    demultiplex_fastas(fastas, fasta_dout, df_config, config_dics, exp_num=2, execute=True)
 
 # hiseq 1 run
 fasta_dir_in = T_SINGLE_2_FILTERED_DIR_M1

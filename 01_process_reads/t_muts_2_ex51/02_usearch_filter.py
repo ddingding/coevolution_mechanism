@@ -17,7 +17,7 @@ def filter_all_fastq(fastqPath, outputDir):
     print("filtering files ", fastq)
     with open(outputDir + "cmdsUsed.txt", "w") as fout:
         for fi in fastq:
-            filter_cmd = filter_fastq_quality(fastqPath + fi, outputDir + fi[:-6], vsearch_path = VSEARCH_PATH)
+            filter_cmd = filter_fastq_quality(fastqPath + fi, outputDir + fi[:-6], vsearch_path = VSEARCH_PATH, execute=True)
             fout.write(filter_cmd + "\n")
 
 

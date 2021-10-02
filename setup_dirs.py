@@ -52,3 +52,4 @@ for f in t_muts_2_machine1_files:
 print('moving t single 2 files machine 2...')
 for f in t_muts_2_machine2_files:
     os.system('mv {}{} {}'.format(DL_DIR, f, T_SINGLE_2_RAW_DIR_M2))
+
