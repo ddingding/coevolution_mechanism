@@ -18,7 +18,7 @@ The processing steps are:
 Steps you need to do:
 1) need to set python path for loading modules found in ./src/, so run: source ./source_modules.sh
 2) install flash and vsearch and set the path in ./src/constants.py
-3) download files from SRA: accession number PRJNA736482, unzip all the files
+3) download files from SRA: accession number PRJNA768258, unzip all the files
 4) set working directory (where all the processed files should land) and download directory in ./src/constants.py
 5) run ./setup_dirs.py to create directory structure and move files to the right place.
 6) run the scripts in each folder of ./01_process_reads/
