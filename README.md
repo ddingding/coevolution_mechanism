@@ -3,7 +3,8 @@
 This code is for reproducibility purposes to accompany the paper. 
 
 Steps in the processing:
-###1. Raw read processing. 
+
+### 1. Raw read processing. 
 process raw reads to get read counts per codon mutant for each sample. 
 
 The code in each subfolder (./01_process_reads/at_combo_lib/, ./01_process_reads/t_muts_1/, ./01_process_reads/t_muts_2/, ./01_process_reads/at_singles/) goes from raw read files (.fastq) to a Timecourse object.
@@ -27,13 +28,13 @@ The output of these scripts is supplied in ./01_process_reads/output/, and can t
 This scripts should call the correct .fastq files directly, but if there are issues, see the analysis_file_pairings.xlsx for the pre-processing code that goes with a particular file.
 
 
-###2. Bayesian inference of growth rates for each amino acid variant.
+### 2. Bayesian inference of growth rates for each amino acid variant.
 To go from read counts per codon mutant in each sample, to posterior beliefs of growth rates for amino acid variants.
 Briefly, we impart all the hierarchical structure we know about the experiment (such as synonymous codon variants should inform the shared amino acid variant growth rates, and that we should use read count data from both replicate experiments to give us a belief about a particular amino acid variant growth rate) in the model.
 Please refer to the paper where we validate this model by comparing our inference on synthetic data, as well as doing extensive posterior predictive checks with our observed data.
 Slight tweaks should make this model run on other single mutant datasets, feel free to contact me for that.
 
-###3. Fitting a non-specific, nonlinear model to single and double mutant data. 
+### 3. Fitting a non-specific, nonlinear model to single and double mutant data. 
 This python notebook (can be run on Google Colab) details how we fit a simple independent, nonlinear model the the single and double mutant data as a null model for our expected double mutant growth rates.
 The independent part of the model means that we only use site-wise, independent mutant effect terms for each amino acid variant, and do not try to model epistatic, pairwise terms. You can see in the paper that this simple model does quite well.
 
