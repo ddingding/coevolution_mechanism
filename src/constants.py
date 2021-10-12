@@ -1,11 +1,11 @@
 #######################################################################################################################
 # Paths to set on your local machine
-DL_DIR = '/n/groups/marks/users/david/sra_all/dl_test/'  # set this path to where the sra files have been downloaded to
-WORK_DIR = '/n/groups/marks/users/david/sra_all/coev_work/'  # set this path to where you want the processed files to be
+DL_DIR = ''  # set this path to where the sra files have been downloaded to
+WORK_DIR = ''  # set this path to where you want the processed files to be
 
 # external tool paths:
-FLASH_PATH = '/n/groups/marks/users/david/apps/FLASH-1.2.11/flash'
-VSEARCH_PATH = '/n/groups/marks/users/david/apps/vsearch/bin/vsearch'
+FLASH_PATH = '' #eg. '/n/groups/marks/users/david/apps/FLASH-1.2.11/flash'
+VSEARCH_PATH = '' #eg. '/n/groups/marks/users/david/apps/vsearch/bin/vsearch'
 
 ########################################################################################################################
 # directories to be created by setup_dirs.py
